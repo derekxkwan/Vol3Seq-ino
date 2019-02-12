@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/pgmspace.h>
 #include "vol3seq.h"
 #include "Volume3.h"
 
@@ -75,7 +76,7 @@ unsigned long Vol3Seq::get_dur(uint16_t cur_idx)
   uint16_t ret_dur = 0;
   if(cur_idx < this->dur_size)
   {
-    if(this->is_progmem == true) ret_dur = pgm_read_float_near(&this->freq[cur_idx]);
+    if(this->is_progmem == true) ret_dur = pgm_read_word_near(&this->freq[cur_idx]);
     else ret_dur = this->dur[cur_idx];
   };
   return ret_dur;
