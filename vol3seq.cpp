@@ -91,7 +91,11 @@ void Vol3Seq::start_playing(bool to_play, unsigned long cur_ms)
     this->cur_startms = cur_ms;
     this->cur_idx = 0;
     this->playing = true;
-    if(cur_dur > 0) vol.tone(this->pin,cur_freq,cur_vol);
+    if(cur_dur > 0)
+    {
+      if(cur_freq > 0) vol.tone(this->pin,cur_freq,cur_vol);
+      else vol.noTone();
+    };
   }
   else
   {
