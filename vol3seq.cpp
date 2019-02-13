@@ -139,7 +139,7 @@ void Vol3Seq::update_status(unsigned long cur_ms)
       unsigned int notelen = this->notelen;
       uint16_t cur_vol = this->get_volume();
 
-      if(cur_time <= cur_dur && cur_time >= notelen) vol.noTone();
+      if(cur_time <= cur_dur && cur_time >= notelen && notelen > 0) vol.noTone();
       
       while(cur_time > cur_dur && cur_idx < max_size)
       {
