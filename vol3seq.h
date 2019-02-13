@@ -29,7 +29,7 @@ public:
   bool playing;
   float * freq;
   unsigned int * dur;
-  unsigned int notelen;
+  unsigned int notelen; // zero notelen = sustain throughout
   uint16_t volume;
   unsigned long cur_startms; //start time of current note event
   uint16_t cur_idx;
