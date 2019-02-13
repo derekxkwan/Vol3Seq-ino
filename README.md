@@ -1,4 +1,4 @@
-# Vol3Seq_ino
+# Vol3Seq-ino
 a Volume3 Sequencer for arduino
 
 
