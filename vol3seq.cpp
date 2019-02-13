@@ -3,7 +3,7 @@
 #include "vol3seq.h"
 #include "Volume3.h"
 
-Vol3Seq::Vol3Seq(int _pin, int _volume, bool _looping)
+Vol3Seq::Vol3Seq(int _pin, unsigned int _notelen, int _volume, bool _looping)
 {
 
   this->pin = _pin;
@@ -14,10 +14,27 @@ Vol3Seq::Vol3Seq(int _pin, int _volume, bool _looping)
   this->cur_idx = 0;
   this->freq_size = 0;
   this->dur_size = 0;
-
+  this->notelen = (unsigned int)max(0, _notelen);
   this->freq = NULL;
   this->dur = NULL;
+  this->endloop = NULL;
 
+}
+
+void Vol3Seq::set_callback(void * funct)
+{
+
+  this->endloop = funct;
+}
+
+void Vol3Seq::set_notelen(unsigned int want_len)
+{
+  this->notelen = (unsigned int)max(0, want_len);
+}
+
+unsigned int Vol3Seq::get_notelen(void)
+{
+  return this->notelen;
 }
 
 void Vol3Seq::set_volume(uint16_t want_vol)
@@ -52,7 +69,7 @@ void Vol3Seq::set_freqs(float * cur_freqs, uint16_t freq_size, bool is_progmem)
   this->is_progmem = is_progmem;
 }
 
-void Vol3Seq::set_durs(unsigned long * cur_durs, uint16_t dur_size, bool is_progmem)
+void Vol3Seq::set_durs(unsigned int * cur_durs, uint16_t dur_size, bool is_progmem)
 {
   this->dur = cur_durs;
   this->dur_size = (uint16_t)max(dur_size, 0);
@@ -71,7 +88,7 @@ float Vol3Seq::get_freq(uint16_t cur_idx)
   return ret_freq;
 }
 
-unsigned long Vol3Seq::get_dur(uint16_t cur_idx)
+unsigned int Vol3Seq::get_dur(uint16_t cur_idx)
 {
   uint16_t ret_dur = 0;
   if(cur_idx < this->dur_size)
@@ -88,11 +105,12 @@ void Vol3Seq::start_playing(bool to_play, unsigned long cur_ms)
   {
     uint16_t cur_vol = this->volume;
     float cur_freq = this->get_freq(0);
-    uint16_t cur_dur = this->get_dur(0);
+    unsigned int cur_dur = this->get_dur(0);
+    unsigned int notelen = this->notelen;
     this->cur_startms = cur_ms;
     this->cur_idx = 0;
     this->playing = true;
-    if(cur_dur > 0)
+    if(cur_dur > 0 && notelen > 0)
     {
       if(cur_freq > 0) vol.tone(this->pin,cur_freq,cur_vol);
       else vol.noTone();
@@ -115,10 +133,14 @@ void Vol3Seq::update_status(unsigned long cur_ms)
     if(cur_idx< max_size)
     {
       bool new_note = false;
-      unsigned long cur_dur = this->get_dur(cur_idx);
+      unsigned int cur_dur = this->get_dur(cur_idx);
       float cur_freq = this->get_freq(cur_idx);
       unsigned long cur_time = cur_ms - this->cur_startms;
+      unsigned int notelen = this->notelen;
       uint16_t cur_vol = this->get_volume();
+
+      if(cur_time <= cur_dur && cur_time >= notelen) vol.noTone();
+      
       while(cur_time > cur_dur && cur_idx < max_size)
       {
         cur_idx++;
@@ -143,6 +165,7 @@ void Vol3Seq::update_status(unsigned long cur_ms)
 
     if(cur_idx >= max_size)
     {
+      if(this->endloop != NULL) this->endloop();
       if(this->looping == true) this->start_playing(true, cur_ms);
       else this->start_playing(false, cur_ms);
     };
