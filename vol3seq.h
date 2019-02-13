@@ -15,6 +15,7 @@ public:
   void set_volume(uint16_t want_vol);
   void set_notelen(unsigned int want_len);
   void set_callback(void * funct);
+  void set_gliss(bool to_gliss);
   unsigned int get_notelen(void);
   uint16_t get_volume(void);
   float get_freq(uint16_t cur_idx);
@@ -27,9 +28,10 @@ public:
   bool is_progmem;
   bool looping;
   bool playing;
+  bool glissing;
   float * freq;
   unsigned int * dur;
-  unsigned int notelen; // zero notelen = sustain throughout
+  unsigned int notelen; // zero note len = sustain throughout
   uint16_t volume;
   unsigned long cur_startms; //start time of current note event
   uint16_t cur_idx;
