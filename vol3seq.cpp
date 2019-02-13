@@ -18,7 +18,13 @@ Vol3Seq::Vol3Seq(int _pin, unsigned int _notelen, int _volume, bool _looping)
   this->freq = NULL;
   this->dur = NULL;
   this->endloop = NULL;
+  this->glissing = false;
 
+}
+
+void Vol3Seq::set_gliss(bool to_gliss)
+{
+ this->glissing = to_gliss; 
 }
 
 void Vol3Seq::set_callback(void * funct)
@@ -133,6 +139,7 @@ void Vol3Seq::update_status(unsigned long cur_ms)
     if(cur_idx< max_size)
     {
       bool new_note = false;
+      bool glissing = this->glissing;
       unsigned int cur_dur = this->get_dur(cur_idx);
       float cur_freq = this->get_freq(cur_idx);
       unsigned long cur_time = cur_ms - this->cur_startms;
@@ -140,6 +147,13 @@ void Vol3Seq::update_status(unsigned long cur_ms)
       uint16_t cur_vol = this->get_volume();
 
       if(cur_time <= cur_dur && cur_time >= notelen && notelen > 0) vol.noTone();
+      else if(cur_time <= cur_dur && ((cur_time < notelen) || notelen == 0) && cur_freq > 0 && glissing == true)
+      {
+        float next_freq = cur_idx >= max_size ? cur_freq : this->get_freq(cur_idx + 1);
+        unsigned int gliss_len = notelen > 0 ? notelen : cur_dur;
+        if(next_freq == 0) next_freq = cur_freq;
+        if(cur_freq != next_freq) cur_freq = cur_freq + ((next_freq - cur_freq) * ((float)cur_dur/(float)gliss_len));
+      };
       
       while(cur_time > cur_dur && cur_idx < max_size)
       {
